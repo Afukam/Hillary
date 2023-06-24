@@ -1,6 +1,10 @@
 import argparse
 import re
 import subprocess
+import schedule
+import time
+
+
 
 def get_arguement():
    parser = argparse.ArgumentParser()
@@ -24,7 +28,33 @@ def mac_change(interface, new_mac):
       subprocess.call(["ifconfig", interface, "hw", "ether", new_mac])
       subprocess.call(["ifconfig", interface, "up"])
    except subprocess.CalledProcessError as e:
-      print("[-] Oops, An error occurred while changing the MAC address. Try again, but make sure you have root access before proceeding")
+      print("[-] Oops, An error occurred while changing the MAC address. Try again, but make sure you have root access before proceeding."
+
+options = get_argument()
+current_mac_address = current_mac(options.interface)
+if current_mac_address:
+   print(f"[+] Current MAC Address = {current_mac_address}")
+
+
+change_mac(options.interface, options.new_mac)
+current_mac_address = current_mac(options.interface)
+if current_mac_address and current_mac_address == options.new_mac:
+   print(f"[+] MAC Address was changed successfully to {current_mac_address}")
+else:
+   print("[-] MAC address was not changed. Try again")
+
+
+schedule.every(5).minutes.do(mac_change)
+
+while True:
+   schedule.run_pending()
+   time.sleep(5)
+else:
+   print("[-] Process terminated. Try again")
+
+   
+   
+      
      
 
       
