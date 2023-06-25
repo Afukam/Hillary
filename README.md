@@ -3,6 +3,8 @@ Hillary is a Mac address changer that helps you remain anonymous by changing you
  * You have to be root user before you can use it.
  * At this point, I wasn't sure if it worked on other OSes except Linux; if it does, please let me know. Thank you.
  * Don't use it for illegal purposes, abeg.
+ * You have to have schedule on your terminal( pip install schedule)
+   
    
 
  
