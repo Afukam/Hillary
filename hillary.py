@@ -13,9 +13,8 @@ def current_mac(interface):
             return mac_address_search_result.group(0)
         else:
             print(f"[-] Couldn't get a MAC Address from {interface}")
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         print(f"[-] An error occurred while getting the current MAC address of {interface}.")
-
 
 def get_argument():
     parser = argparse.ArgumentParser()
@@ -31,33 +30,17 @@ def get_argument():
 
     return options
 
-
 def change_mac(interface, new_mac):
     print(f"[+] Changing the MAC address for {interface} to {new_mac}")
     try:
         subprocess.call(["ifconfig", interface, "down"])
         subprocess.call(["ifconfig", interface, "hw", "ether", new_mac])
         subprocess.call(["ifconfig", interface, "up"])
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError:
         print("[-] An error occurred while changing the MAC address.")
 
-
 def generate_random_mac():
-    random_mac = [
-        random.choice("0123456789abcdef") + random.choice("02468ace") +
-        ":" +
-        random.choice("0123456789abcdef") + random.choice("02468ace") +
-        ":" +
-        random.choice("0123456789abcdef") + random.choice("02468ace") +
-        ":" +
-        random.choice("0123456789abcdef") + random.choice("02468ace") +
-        ":" +
-        random.choice("0123456789abcdef") + random.choice("02468ace") +
-        ":" +
-        random.choice("0123456789abcdef") + random.choice("02468ace")
-    ]
-    return "".join(random_mac)
-
+    return ":".join([f"{random.randint(0, 255):02x}" for _ in range(6)])
 
 options = get_argument()
 if options.random_mac:
@@ -74,7 +57,13 @@ if current_mac_address and current_mac_address == options.new_mac:
 else:
     print("[-] MAC address was not changed. Try again")
 
-schedule.every(5).minutes.do(change_mac)
+# Schedule the MAC address change every 5 minutes
+schedule.every(5).minutes.do(change_mac, options.interface, options.new_mac)
+
+while True:
+    schedule.run_pending()
+    time.sleep(5)
+
 
 while True:
     schedule.run_pending()
